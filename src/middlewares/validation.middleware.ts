@@ -5,7 +5,7 @@ import { ValidationException } from '@/utils/exceptions';
 /**
  * Middleware that validates request data against a Zod schema
  */
-const validate =
+const validationMiddleware =
   (schema: AnyZodObject) =>
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -33,4 +33,4 @@ const validate =
     }
   };
 
-export default validate;
+export default validationMiddleware;

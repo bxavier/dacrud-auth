@@ -1,9 +1,16 @@
-# Node.js Express TypeScript Boilerplate
+# DaCrud Auth Microservice
 
-A clean, well-structured boilerplate for building RESTful APIs with Node.js, Express, TypeScript, and MongoDB.
+An authentication microservice built with Node.js, Express, TypeScript, and MongoDB that provides secure JWT-based authentication functionality.
+
+## Overview
+
+This microservice is part of a larger microservices architecture plan. It currently handles user authentication and authorization using JWT (JSON Web Tokens) with plans to implement additional microservices in the future.
 
 ## Features
 
+- **JWT Authentication**: Secure token-based authentication
+- **User Management**: Registration, login, and account management
+- **Role-Based Access Control**: Configurable user permissions
 - **TypeScript Support**
 - **Express 5**
 - **MongoDB Integration**: Mongoose ODM with connection retry
@@ -14,6 +21,15 @@ A clean, well-structured boilerplate for building RESTful APIs with Node.js, Exp
 - **Security**: Helmet
 - **API Documentation**: Minimal Swagger integration
 - **Health Monitoring**: System health checks
+
+## Future Plans
+
+This authentication service is the first in a planned series of microservices. Future implementations will include:
+
+- **User Profile Service**: Manage user profile data
+- **Resource Service**: Handle application-specific resources
+- **Notification Service**: Email, SMS, and push notifications
+- **API Gateway**: Central entry point for all microservices
 
 ## Project Structure
 
@@ -29,7 +45,7 @@ src/
 
 ## Architecture
 
-This boilerplate follows a modular architecture:
+This microservice follows a modular architecture:
 
 1. **Controller**: HTTP requests and responses
 2. **Service**: Business logic
@@ -58,7 +74,9 @@ Each resource (like User) follows this pattern, providing clear separation of co
    MONGO_PATH=localhost:27017
    MONGO_USER=admin
    MONGO_PASSWORD=password
-   MONGO_DATABASE=my_database
+   MONGO_DATABASE=auth_database
+   JWT_SECRET=your_jwt_secret
+   JWT_EXPIRES_IN=1d
    ```
 
 ### Running the Application

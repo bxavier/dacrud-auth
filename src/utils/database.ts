@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
-import logger from './logger';
+import { LoggerService } from './logger';
 import config from './config';
+
+const logger = new LoggerService('Database');
 
 /**
  * Initialize database connection

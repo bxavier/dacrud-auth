@@ -6,12 +6,14 @@ import Controller from '@/utils/interfaces/controller.interface';
 import ErrorMiddleware from '@/middlewares/error.middleware';
 import helmet from 'helmet';
 import connectDatabase from '@/utils/database';
-import logger from '@/utils/logger';
+import { LoggerService } from '@/utils/logger';
 import config from '@/utils/config';
 import { setupSwagger } from '@/utils/swagger';
+
 class App {
   public express: Application;
   public port: number;
+  private logger = new LoggerService('App');
 
   constructor(controllers: Controller[]) {
     this.express = express();
@@ -65,7 +67,7 @@ class App {
 
   public listen(): void {
     this.express.listen(this.port, () => {
-      logger.info(`App listening on port ${this.port}`);
+      this.logger.info(`App listening on port ${this.port}`);
     });
   }
 }

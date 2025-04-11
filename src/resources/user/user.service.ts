@@ -1,90 +1,65 @@
 import UserModel from './user.model';
 import { User } from './user.interface';
-import { ConflictException, NotFoundException, ServerException } from '@/utils/exceptions';
+import { ConflictException, NotFoundException, ServerException, UnauthorizedException } from '@/utils/exceptions';
+import token from '@/utils/token';
+import { LoggerService } from '@/utils/logger';
 
 class UserService {
+  logger = new LoggerService('UserService');
   /**
-   * Create a new user
+   * Register a new user
    */
-  public async create(userData: Omit<User, '_id'>): Promise<User> {
+  public async register(name: string, email: string, password: string, role: string): Promise<string> {
     try {
-      const user = await UserModel.create(userData);
-      return user;
+      const user = await UserModel.create({ name, email, password, role });
+      const accessToken = await token.createToken(user);
+
+      return accessToken;
     } catch (error: any) {
       if (error.code === 11000) {
-        throw new ConflictException('User with this email');
+        throw new ConflictException('User with this email already exists');
       }
       throw new ServerException('Unable to create user');
     }
   }
 
   /**
-   * Find all users
+   * Login a user
    */
-  public async findAll(): Promise<User[]> {
+  public async login(email: string, password: string): Promise<string> {
     try {
-      const users = await UserModel.find().select('-password');
-      return users;
-    } catch (error) {
-      throw new ServerException('Unable to find users');
-    }
-  }
+      // Validate input
+      if (!email || !password) {
+        throw new UnauthorizedException('Email and password are required');
+      }
 
-  /**
-   * Find user by ID
-   */
-  public async findById(id: string): Promise<User> {
-    try {
-      const user = await UserModel.findById(id).select('-password');
+      const user = await UserModel.findOne({ email });
 
       if (!user) {
-        throw new NotFoundException('User');
+        this.logger.warn(`Login attempt failed: User with email ${email} not found`);
+        throw new UnauthorizedException('Invalid email or password');
       }
 
-      return user;
+      const isPasswordValid = await user.isValidPassword(password);
+
+      if (!isPasswordValid) {
+        this.logger.warn(`Login attempt failed: Invalid password for user ${email}`);
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
+      return await token.createToken(user);
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      // If it's already one of our custom exceptions, rethrow it
+      if (error instanceof UnauthorizedException || error instanceof NotFoundException || error instanceof ConflictException) {
         throw error;
       }
-      throw new ServerException('Unable to find user');
-    }
-  }
 
-  /**
-   * Update user
-   */
-  public async update(id: string, userData: Partial<User>): Promise<User> {
-    try {
-      const user = await UserModel.findByIdAndUpdate(id, userData, { new: true }).select('-password');
+      // Log the actual error for debugging
+      this.logger.error(`Login error: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(`Stack trace: ${error instanceof Error ? error.stack : 'No stack trace'}`);
 
-      if (!user) {
-        throw new NotFoundException('User');
-      }
-
-      return user;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new ServerException('Unable to update user');
-    }
-  }
-
-  /**
-   * Delete user
-   */
-  public async delete(id: string): Promise<void> {
-    try {
-      const result = await UserModel.findByIdAndDelete(id);
-
-      if (!result) {
-        throw new NotFoundException('User');
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new ServerException('Unable to delete user');
+      // Otherwise, wrap in a server exception
+      throw new ServerException('Unable to login');
     }
   }
 }

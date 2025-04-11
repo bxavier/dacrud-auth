@@ -10,6 +10,8 @@ class Config {
   public MONGO_USER: string;
   public MONGO_PASSWORD: string;
   public MONGO_DATABASE: string;
+  public JWT_SECRET: string;
+  public JWT_EXPIRES_IN: string;
 
   constructor() {
     // Validate and clean environment variables
@@ -20,6 +22,8 @@ class Config {
       MONGO_USER: str(),
       MONGO_PASSWORD: str(),
       MONGO_DATABASE: str(),
+      JWT_SECRET: str(),
+      JWT_EXPIRES_IN: str(),
     });
 
     // Assign validated env variables to class properties
@@ -29,6 +33,8 @@ class Config {
     this.MONGO_USER = env.MONGO_USER;
     this.MONGO_PASSWORD = env.MONGO_PASSWORD;
     this.MONGO_DATABASE = env.MONGO_DATABASE;
+    this.JWT_SECRET = env.JWT_SECRET;
+    this.JWT_EXPIRES_IN = env.JWT_EXPIRES_IN;
   }
 
   /**

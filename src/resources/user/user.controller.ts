@@ -1,42 +1,23 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import Controller from '@/utils/interfaces/controller.interface';
+import IController from '@/utils/interfaces/controller.interface';
 import UserService from './user.service';
-import validate from '@/middlewares/validation.middleware';
-import userValidation from './user.validation';
+import validationMiddleware from '@/middlewares/validation.middleware';
+import userValidation, { user } from './user.validation';
+import authenticationMiddleware from '@/middlewares/authenticated.middleware';
+import { UnauthorizedException } from '@/utils/exceptions';
 
 /**
  * @openapi
  * components:
- *   schemas:
- *     CreateUserRequest:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *         email:
- *           type: string
- *         password:
- *           type: string
- *         role:
- *           type: string
- *
- *     UpdateUserRequest:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *         email:
- *           type: string
- *         password:
- *           type: string
- *         role:
- *           type: string
- *
- * tags:
- *   name: Users
- *   description: User management
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *       description: JWT token for authentication. Use the token from login or register response.
  */
-class UserController implements Controller {
+
+class UserController implements IController {
   public path = '/users';
   public router: Router;
   private userService: UserService;
@@ -48,63 +29,14 @@ class UserController implements Controller {
   }
 
   private initializeRoutes(): void {
-    this.router.get(this.path, this.getUsers);
-    this.router.get(`${this.path}/:id`, validate(userValidation.getUser), this.getUser);
-    this.router.post(this.path, validate(userValidation.createUser), this.createUser);
-    this.router.put(`${this.path}/:id`, validate(userValidation.updateUser), this.updateUser);
-    this.router.delete(`${this.path}/:id`, validate(userValidation.deleteUser), this.deleteUser);
+    this.router.post(`${this.path}/register`, validationMiddleware(userValidation.user), this.register);
+    this.router.post(`${this.path}/login`, validationMiddleware(userValidation.login), this.login);
+    this.router.get(`${this.path}`, authenticationMiddleware, this.getUser);
   }
 
   /**
    * @openapi
-   * /users:
-   *   get:
-   *     summary: Get all users
-   *     tags: [Users]
-   *     responses:
-   *       200:
-   *         description: Success
-   */
-  private getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const users = await this.userService.findAll();
-      res.status(200).json({ data: users });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  /**
-   * @openapi
-   * /users/{id}:
-   *   get:
-   *     summary: Get user by ID
-   *     tags: [Users]
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Success
-   *       404:
-   *         description: Not found
-   */
-  private getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const user = await this.userService.findById(id);
-      res.status(200).json({ data: user });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  /**
-   * @openapi
-   * /users:
+   * /users/register:
    *   post:
    *     summary: Create user
    *     tags: [Users]
@@ -113,18 +45,43 @@ class UserController implements Controller {
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: '#/components/schemas/CreateUserRequest'
+   *             type: object
+   *             required:
+   *               - name
+   *               - email
+   *               - password
+   *             properties:
+   *               name:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *                 format: email
+   *               password:
+   *                 type: string
+   *                 format: password
+   *               role:
+   *                 type: string
+   *                 enum:
+   *                   - user
+   *                   - admin
    *     responses:
    *       201:
-   *         description: Created
+   *         description: User created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 token:
+   *                   type: string
    *       400:
    *         description: Bad request
    */
-  private createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData = req.body;
-      const user = await this.userService.create(userData);
-      res.status(201).json({ data: user });
+      const { name, email, password, role = 'user' } = req.body;
+      const token = await this.userService.register(name, email, password, role);
+      res.status(201).json({ token });
     } catch (error) {
       next(error);
     }
@@ -132,34 +89,44 @@ class UserController implements Controller {
 
   /**
    * @openapi
-   * /users/{id}:
-   *   put:
-   *     summary: Update user
+   * /users/login:
+   *   post:
+   *     summary: Login user
    *     tags: [Users]
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: '#/components/schemas/UpdateUserRequest'
+   *             type: object
+   *             required:
+   *               - email
+   *               - password
+   *             properties:
+   *               email:
+   *                 type: string
+   *                 format: email
+   *               password:
+   *                 type: string
+   *                 format: password
    *     responses:
    *       200:
-   *         description: Success
-   *       404:
-   *         description: Not found
+   *         description: Login successful
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 token:
+   *                   type: string
+   *       400:
+   *         description: Bad request
    */
-  private updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { id } = req.params;
-      const userData = req.body;
-      const user = await this.userService.update(id, userData);
-      res.status(200).json({ data: user });
+      const { email, password } = req.body;
+      const token = await this.userService.login(email, password);
+      res.status(200).json({ token });
     } catch (error) {
       next(error);
     }
@@ -167,30 +134,45 @@ class UserController implements Controller {
 
   /**
    * @openapi
-   * /users/{id}:
-   *   delete:
-   *     summary: Delete user
+   * /users:
+   *   get:
+   *     summary: Get authenticated user information
    *     tags: [Users]
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
+   *     security:
+   *       - bearerAuth: []
    *     responses:
-   *       204:
-   *         description: No content
-   *       404:
-   *         description: Not found
+   *       200:
+   *         description: User information retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 user:
+   *                   type: object
+   *                   properties:
+   *                     _id:
+   *                       type: string
+   *                     name:
+   *                       type: string
+   *                     email:
+   *                       type: string
+   *                     role:
+   *                       type: string
+   *                     createdAt:
+   *                       type: string
+   *                     updatedAt:
+   *                       type: string
+   *       401:
+   *         description: Unauthorized - Invalid or missing token
+   *       403:
+   *         description: Forbidden - Valid token but insufficient permissions
    */
-  private deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { id } = req.params;
-      await this.userService.delete(id);
-      res.status(204).send();
-    } catch (error) {
-      next(error);
+  private getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (!req.user) {
+      return next(new UnauthorizedException('Unauthorized'));
     }
+    res.status(200).json({ user: req.user });
   };
 }
 

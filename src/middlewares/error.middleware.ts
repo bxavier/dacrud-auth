@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiException } from '@/utils/exceptions';
-import logger from '@/utils/logger';
+import { LoggerService } from '@/utils/logger';
 
+const logger = new LoggerService('ErrorMiddleware');
 const errorMiddleware = (error: Error, request: Request, response: Response, next: NextFunction): void => {
   // If it's one of our API exceptions
   if (error instanceof ApiException) {

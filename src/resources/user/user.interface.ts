@@ -1,8 +1,9 @@
-export interface User {
-  _id: string;
+import { Document } from 'mongoose';
+
+export interface User extends Document {
   name: string;
   email: string;
   password: string;
   role: string;
-  createdAt: Date;
+  isValidPassword: (password: string) => Promise<Error | boolean>;
 }

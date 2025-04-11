@@ -1,8 +1,9 @@
 import { Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
-import logger from './logger';
-import config from './config';
+import { LoggerService } from './logger';
+
+const logger = new LoggerService('Swagger');
 
 export const setupSwagger = (app: Application) => {
   const options: swaggerJSDoc.Options = {
@@ -19,12 +20,22 @@ export const setupSwagger = (app: Application) => {
           description: 'API Server',
         },
       ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
     apis: ['src/resources/**/*.ts'],
   };
 
   const swaggerSpec = swaggerJSDoc(options);
 
+  // Serve Swagger UI
   app.use(
     '/docs',
     swaggerUi.serve,
@@ -34,5 +45,12 @@ export const setupSwagger = (app: Application) => {
     })
   );
 
+  // Serve Swagger JSON
+  app.get('/docs-json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+
   logger.info('📚 Swagger docs available at /docs');
+  logger.info('📄 Swagger JSON available at /docs-json');
 };
