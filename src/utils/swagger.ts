@@ -35,7 +35,6 @@ export const setupSwagger = (app: Application) => {
 
   const swaggerSpec = swaggerJSDoc(options);
 
-  // Serve Swagger UI
   app.use(
     '/docs',
     swaggerUi.serve,
@@ -45,7 +44,6 @@ export const setupSwagger = (app: Application) => {
     })
   );
 
-  // Serve Swagger JSON
   app.get('/docs-json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);

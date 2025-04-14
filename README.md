@@ -159,14 +159,14 @@ This single endpoint provides all the necessary information for monitoring the a
 The application uses a comprehensive exception hierarchy for consistent error handling:
 
 ```
-ApiException                 // Base class for all API errors
-├── HttpException            // Base for HTTP errors
-    ├── ValidationException  // 400 - Validation errors
+ApiException                  // Base class for all API errors
+├── HttpException             // Base for HTTP errors
+    ├── ValidationException   // 400 - Validation errors
     ├── UnauthorizedException // 401 - Authentication required
-    ├── ForbiddenException   // 403 - Permissions issues
-    ├── NotFoundException    // 404 - Resource not found
-    ├── ConflictException    // 409 - Resource conflicts
-    └── ServerException      // 500 - Server errors
+    ├── ForbiddenException    // 403 - Permissions issues
+    ├── NotFoundException     // 404 - Resource not found
+    ├── ConflictException     // 409 - Resource conflicts
+    └── ServerException       // 500 - Server errors
 ```
 
 All errors return a consistent JSON response:

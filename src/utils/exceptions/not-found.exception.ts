@@ -7,7 +7,6 @@ class NotFoundException extends HttpException {
   constructor(resource: string = 'Resource') {
     super(404, `${resource} not found`, undefined, 'RESOURCE_NOT_FOUND');
 
-    // Ensure the correct prototype chain for instanceof checks
     Object.setPrototypeOf(this, NotFoundException.prototype);
   }
 }

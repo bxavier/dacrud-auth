@@ -1,6 +1,5 @@
 import winston from 'winston';
 
-// Type for log levels
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'debug';
 
 /**
@@ -16,7 +15,6 @@ export class LoggerService {
   }
 
   private createLogger(): winston.Logger {
-    // Define log levels
     const levels = {
       error: 0,
       warn: 1,
@@ -25,13 +23,11 @@ export class LoggerService {
       debug: 4,
     };
 
-    // Define level based on environment
     const level = () => {
       const env = process.env.NODE_ENV || 'development';
       return env === 'development' ? 'debug' : 'warn';
     };
 
-    // Define colors for each level
     const colors = {
       error: 'red',
       warn: 'yellow',
@@ -40,21 +36,17 @@ export class LoggerService {
       debug: 'blue',
     };
 
-    // Add colors to Winston
     winston.addColors(colors);
 
-    // Define the format
     const format = winston.format.combine(
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
       winston.format.colorize({ all: false }),
       winston.format.printf((info) => {
-        // Make only the message white while preserving level colors
         const source = info.source ? `[${info.source}]` : '';
         return `[${info.timestamp}] [${info.level}]${source} -> \x1b[37m${info.message}\x1b[0m`;
       })
     );
 
-    // Define transports
     const transports = [
       new winston.transports.Console(),
       new winston.transports.File({
@@ -64,7 +56,6 @@ export class LoggerService {
       new winston.transports.File({ filename: 'logs/all.log' }),
     ];
 
-    // Create and return the logger
     return winston.createLogger({
       level: level(),
       levels,

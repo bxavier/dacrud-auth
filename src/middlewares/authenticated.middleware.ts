@@ -11,7 +11,6 @@ async function authenticationMiddleware(req: Request, res: Response, next: NextF
   try {
     const bearer = req.headers.authorization;
 
-    // Log headers for debugging
     logger.debug(`Headers: ${JSON.stringify(req.headers)}`);
 
     if (!bearer || !bearer.startsWith('Bearer ')) {

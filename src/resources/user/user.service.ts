@@ -28,7 +28,6 @@ class UserService {
    */
   public async login(email: string, password: string): Promise<string> {
     try {
-      // Validate input
       if (!email || !password) {
         throw new UnauthorizedException('Email and password are required');
       }
@@ -49,16 +48,13 @@ class UserService {
 
       return await token.createToken(user);
     } catch (error) {
-      // If it's already one of our custom exceptions, rethrow it
       if (error instanceof UnauthorizedException || error instanceof NotFoundException || error instanceof ConflictException) {
         throw error;
       }
 
-      // Log the actual error for debugging
       this.logger.error(`Login error: ${error instanceof Error ? error.message : String(error)}`);
       this.logger.error(`Stack trace: ${error instanceof Error ? error.stack : 'No stack trace'}`);
 
-      // Otherwise, wrap in a server exception
       throw new ServerException('Unable to login');
     }
   }

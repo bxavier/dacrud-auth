@@ -30,7 +30,6 @@ class App {
     this.express.use(helmet());
     this.express.use(cors());
 
-    // Create morgan token for timestamp in winston format
     morgan.token('timestamp', () => {
       const now = new Date();
       const datePart = now.toISOString().replace('T', ' ').replace('Z', '').split('.')[0];

@@ -14,7 +14,6 @@ class ApiException extends Error {
     this.errors = errors;
     this.code = code;
 
-    // Ensure the correct prototype chain for instanceof checks
     Object.setPrototypeOf(this, ApiException.prototype);
   }
 }

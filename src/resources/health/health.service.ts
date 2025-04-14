@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import si from 'systeminformation';
 import config from '@/utils/config';
+import { LoggerService } from '@/utils/logger';
 
 interface DatabaseStatus {
   name: string;
@@ -47,6 +48,8 @@ interface SystemHealth {
 }
 
 class HealthService {
+  private logger = new LoggerService('HealthService');
+
   /**
    * Check database connection status
    */
@@ -67,7 +70,6 @@ class HealthService {
       status: currentDbState.label,
     };
 
-    // If connected, measure response time with a simple ping
     if (currentDbState.value === 1 && mongoose.connection.db) {
       try {
         const start = Date.now();
@@ -75,7 +77,7 @@ class HealthService {
         const end = Date.now();
         dbInfo.responseTime = end - start;
       } catch (error) {
-        // Ignore errors when checking response time
+        this.logger.error(`Error checking database connection: ${error}`);
       }
     }
 
@@ -86,7 +88,6 @@ class HealthService {
    * Get overall system health
    */
   public async getHealth(): Promise<SystemHealth> {
-    // Execute all promises in parallel
     const [dbStatus, cpuLoad, cpuInfo, memInfo, diskInfo] = await Promise.all([
       this.getDatabaseStatus(),
       si.currentLoad(),
@@ -97,7 +98,6 @@ class HealthService {
 
     const primaryDisk = diskInfo[0] || { size: 0, used: 0, available: 0 };
 
-    // Overall health status
     const isHealthy = dbStatus.state === 1 && cpuLoad.currentLoad < 90 && memInfo.available > 1000000000;
 
     return {
