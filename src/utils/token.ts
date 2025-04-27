@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import Token from './interfaces/token.interface';
 import config from './config';
 import { User } from '@/resources/user/user.interface';
+import crypto from 'crypto';
 
 export const createToken = async (user: User): Promise<string> => {
   return jwt.sign({ id: user._id }, config.JWT_SECRET as jwt.Secret, { expiresIn: config.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'] });
@@ -16,4 +17,8 @@ export const verifyToken = async (token: string): Promise<jwt.VerifyErrors | Tok
   });
 };
 
-export default { createToken, verifyToken };
+export const generateActivationToken = (): string => {
+  return crypto.randomBytes(32).toString('hex');
+};
+
+export default { createToken, verifyToken, generateActivationToken };

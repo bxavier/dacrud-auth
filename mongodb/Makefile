@@ -21,10 +21,3 @@ clean:
 	$(CONTAINER_TOOL) rm -f $(APP_NAME)-$(MODULE_NAME) || true
 	$(CONTAINER_TOOL) volume prune -f
 
-compose_tool = podman-compose
-
-compose-run:
-	$(compose_tool) up -d
-
-compose-stop:
-	$(compose_tool) down

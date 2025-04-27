@@ -5,36 +5,41 @@ db.users.insertMany([
   {
     name: 'Admin User',
     email: 'admin@example.com',
-    password: '$2a$10$IiUBB.0.WBRlVwJOgGJJdO8AZVO8wR9soDzY5OUaE031sCxlj9FR2', // hashed 'password123'
+    password: '$2b$10$DrR3pxnUJmppl8t7oQYnj.NZ8bBs3YN1onmvvSpamb3fsjcxITp9K', // hashed 'password123'
     role: 'admin',
     createdAt: new Date(),
+    isActive: true,
   },
   {
     name: 'Regular User',
     email: 'user@example.com',
-    password: '$2a$10$IiUBB.0.WBRlVwJOgGJJdO8AZVO8wR9soDzY5OUaE031sCxlj9FR2', // hashed 'password123'
+    password: '$2b$10$DrR3pxnUJmppl8t7oQYnj.NZ8bBs3YN1onmvvSpamb3fsjcxITp9K', // hashed 'password123'
     role: 'user',
     createdAt: new Date(),
+    isActive: true,
   },
   {
     name: 'John Doe',
     email: 'john.doe@example.com',
-    password: '$2a$10$IiUBB.0.WBRlVwJOgGJJdO8AZVO8wR9soDzY5OUaE031sCxlj9FR2',
+    password: '$2b$10$DrR3pxnUJmppl8t7oQYnj.NZ8bBs3YN1onmvvSpamb3fsjcxITp9K',
     role: 'user',
     createdAt: new Date(),
+    isActive: true,
   },
   {
     name: 'Jane Smith',
     email: 'jane.smith@example.com',
-    password: '$2a$10$IiUBB.0.WBRlVwJOgGJJdO8AZVO8wR9soDzY5OUaE031sCxlj9FR2',
+    password: '$2b$10$DrR3pxnUJmppl8t7oQYnj.NZ8bBs3YN1onmvvSpamb3fsjcxITp9K',
     role: 'user',
     createdAt: new Date(),
+    isActive: true,
   },
   {
     name: 'Super Admin',
     email: 'superadmin@example.com',
-    password: '$2a$10$IiUBB.0.WBRlVwJOgGJJdO8AZVO8wR9soDzY5OUaE031sCxlj9FR2',
+    password: '$2b$10$DrR3pxnUJmppl8t7oQYnj.NZ8bBs3YN1onmvvSpamb3fsjcxITp9K',
     role: 'admin',
     createdAt: new Date(),
+    isActive: true,
   },
 ]);

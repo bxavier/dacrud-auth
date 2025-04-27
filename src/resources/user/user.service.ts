@@ -3,22 +3,37 @@ import { User } from './user.interface';
 import { ConflictException, NotFoundException, ServerException, UnauthorizedException } from '@/utils/exceptions';
 import token from '@/utils/token';
 import { LoggerService } from '@/utils/logger';
+import emailService from '@/utils/email';
 
 class UserService {
   logger = new LoggerService('UserService');
   /**
    * Register a new user
    */
-  public async register(name: string, email: string, password: string, role: string): Promise<string> {
+  public async register(name: string, email: string, password: string, role: string): Promise<void> {
     try {
-      const user = await UserModel.create({ name, email, password, role });
-      const accessToken = await token.createToken(user);
+      // Generate activation token
+      const activationToken = token.generateActivationToken();
 
-      return accessToken;
+      // Create user with activation token
+      const user = await UserModel.create({
+        name,
+        email,
+        password,
+        role,
+        activationToken,
+        isActive: false,
+      });
+
+      // Send activation email
+      await emailService.sendActivationEmail(email, name, activationToken);
+
+      this.logger.info(`User ${email} registered successfully. Activation email sent.`);
     } catch (error: any) {
       if (error.code === 11000) {
         throw new ConflictException('User with this email already exists');
       }
+      this.logger.error(`Register error: ${error instanceof Error ? error.message : String(error)}`);
       throw new ServerException('Unable to create user');
     }
   }
@@ -46,6 +61,12 @@ class UserService {
         throw new UnauthorizedException('Invalid email or password');
       }
 
+      // Check if user is activated
+      if (!user.isActive) {
+        this.logger.warn(`Login attempt failed: User ${email} is not activated`);
+        throw new UnauthorizedException('Please activate your account first. Check your email for activation instructions.');
+      }
+
       return await token.createToken(user);
     } catch (error) {
       if (error instanceof UnauthorizedException || error instanceof NotFoundException || error instanceof ConflictException) {
@@ -56,6 +77,72 @@ class UserService {
       this.logger.error(`Stack trace: ${error instanceof Error ? error.stack : 'No stack trace'}`);
 
       throw new ServerException('Unable to login');
+    }
+  }
+
+  /**
+   * Activate a user account
+   * @param activationToken The token sent to the user's email
+   */
+  public async activate(activationToken: string): Promise<User> {
+    try {
+      // Find user with the provided activation token
+      const user = await UserModel.findOne({ activationToken });
+
+      if (!user) {
+        this.logger.warn(`Activation failed: Invalid token ${activationToken}`);
+        throw new NotFoundException('Invalid activation token');
+      }
+
+      // Activate the user
+      user.isActive = true;
+      user.activationToken = null; // Clear the token for security
+      await user.save();
+
+      this.logger.info(`User ${user.email} activated successfully`);
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.logger.error(`Activation error: ${error instanceof Error ? error.message : String(error)}`);
+      throw new ServerException('Unable to activate account');
+    }
+  }
+
+  /**
+   * Resend activation email
+   * @param email The user's email
+   */
+  public async resendActivation(email: string): Promise<void> {
+    try {
+      const user = await UserModel.findOne({ email });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (user.isActive) {
+        throw new ConflictException('Account is already activated');
+      }
+
+      // Generate new activation token
+      const activationToken = token.generateActivationToken();
+      user.activationToken = activationToken;
+      await user.save();
+
+      // Send new activation email
+      await emailService.sendActivationEmail(user.email, user.name, activationToken);
+
+      this.logger.info(`Activation email resent to ${email}`);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ConflictException) {
+        throw error;
+      }
+
+      this.logger.error(`Resend activation error: ${error instanceof Error ? error.message : String(error)}`);
+      throw new ServerException('Unable to resend activation email');
     }
   }
 }

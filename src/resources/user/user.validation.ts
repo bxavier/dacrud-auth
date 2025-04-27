@@ -17,4 +17,16 @@ export const login = z.object({
   }),
 });
 
-export default { user, login };
+export const activate = z.object({
+  body: z.object({
+    token: z.string(),
+  }),
+});
+
+export const resendActivation = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email format'),
+  }),
+});
+
+export default { user, login, activate, resendActivation };
