@@ -1,6 +1,6 @@
 import { CallbackError, Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import { User } from './user.interface';
+import { IUser } from '@/shared/interfaces/user.interface';
 import { LoggerService } from '@/utils/logger';
 
 const logger = new LoggerService('UserModel');
@@ -34,11 +34,19 @@ const UserSchema = new Schema(
       type: String,
       default: null,
     },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
-UserSchema.pre<User>('save', async function (next) {
+UserSchema.pre<IUser>('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   try {
@@ -54,4 +62,4 @@ UserSchema.methods.isValidPassword = async function (password: string): Promise<
   return await bcrypt.compare(password, this.password);
 };
 
-export default model<User>('User', UserSchema);
+export default model<IUser>('User', UserSchema);

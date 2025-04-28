@@ -1,3 +1,6 @@
+# Editors
+.cursor
+.vscode
 # Dist
 dist
 

@@ -1,121 +1,39 @@
-import UserModel from './user.model';
-import { User } from './user.interface';
-import { ConflictException, NotFoundException, ServerException, UnauthorizedException } from '@/utils/exceptions';
-import token from '@/utils/token';
+import UserModel from '@/shared/models/user.model';
+import { IUser } from '@/shared/interfaces/user.interface';
+import { NotFoundException, ServerException, UnauthorizedException } from '@/utils/exceptions';
 import { LoggerService } from '@/utils/logger';
-import emailService from '@/utils/email';
 
 class UserService {
   logger = new LoggerService('UserService');
-  /**
-   * Register a new user
-   */
-  public async register(name: string, email: string, password: string, role: string): Promise<void> {
-    try {
-      // Generate activation token
-      const activationToken = token.generateActivationToken();
-
-      // Create user with activation token
-      const user = await UserModel.create({
-        name,
-        email,
-        password,
-        role,
-        activationToken,
-        isActive: false,
-      });
-
-      // Send activation email
-      await emailService.sendActivationEmail(email, name, activationToken);
-
-      this.logger.info(`User ${email} registered successfully. Activation email sent.`);
-    } catch (error: any) {
-      if (error.code === 11000) {
-        throw new ConflictException('User with this email already exists');
-      }
-      this.logger.error(`Register error: ${error instanceof Error ? error.message : String(error)}`);
-      throw new ServerException('Unable to create user');
-    }
-  }
 
   /**
-   * Login a user
+   * Get user by ID
+   * @param userId User ID to retrieve
    */
-  public async login(email: string, password: string): Promise<string> {
+  public async getUserById(userId: string): Promise<IUser> {
     try {
-      if (!email || !password) {
-        throw new UnauthorizedException('Email and password are required');
-      }
-
-      const user = await UserModel.findOne({ email });
+      const user = await UserModel.findById(userId);
 
       if (!user) {
-        this.logger.warn(`Login attempt failed: User with email ${email} not found`);
-        throw new UnauthorizedException('Invalid email or password');
+        throw new NotFoundException('User not found');
       }
 
-      const isPasswordValid = await user.isValidPassword(password);
-
-      if (!isPasswordValid) {
-        this.logger.warn(`Login attempt failed: Invalid password for user ${email}`);
-        throw new UnauthorizedException('Invalid email or password');
-      }
-
-      // Check if user is activated
-      if (!user.isActive) {
-        this.logger.warn(`Login attempt failed: User ${email} is not activated`);
-        throw new UnauthorizedException('Please activate your account first. Check your email for activation instructions.');
-      }
-
-      return await token.createToken(user);
-    } catch (error) {
-      if (error instanceof UnauthorizedException || error instanceof NotFoundException || error instanceof ConflictException) {
-        throw error;
-      }
-
-      this.logger.error(`Login error: ${error instanceof Error ? error.message : String(error)}`);
-      this.logger.error(`Stack trace: ${error instanceof Error ? error.stack : 'No stack trace'}`);
-
-      throw new ServerException('Unable to login');
-    }
-  }
-
-  /**
-   * Activate a user account
-   * @param activationToken The token sent to the user's email
-   */
-  public async activate(activationToken: string): Promise<User> {
-    try {
-      // Find user with the provided activation token
-      const user = await UserModel.findOne({ activationToken });
-
-      if (!user) {
-        this.logger.warn(`Activation failed: Invalid token ${activationToken}`);
-        throw new NotFoundException('Invalid activation token');
-      }
-
-      // Activate the user
-      user.isActive = true;
-      user.activationToken = null; // Clear the token for security
-      await user.save();
-
-      this.logger.info(`User ${user.email} activated successfully`);
       return user;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error(`Activation error: ${error instanceof Error ? error.message : String(error)}`);
-      throw new ServerException('Unable to activate account');
+      this.logger.error(`Get user error: ${error instanceof Error ? error.message : String(error)}`);
+      throw new ServerException('Unable to retrieve user information');
     }
   }
 
   /**
-   * Resend activation email
-   * @param email The user's email
+   * Get user by email
+   * @param email User email to retrieve
    */
-  public async resendActivation(email: string): Promise<void> {
+  public async getUserByEmail(email: string): Promise<IUser> {
     try {
       const user = await UserModel.findOne({ email });
 
@@ -123,26 +41,14 @@ class UserService {
         throw new NotFoundException('User not found');
       }
 
-      if (user.isActive) {
-        throw new ConflictException('Account is already activated');
-      }
-
-      // Generate new activation token
-      const activationToken = token.generateActivationToken();
-      user.activationToken = activationToken;
-      await user.save();
-
-      // Send new activation email
-      await emailService.sendActivationEmail(user.email, user.name, activationToken);
-
-      this.logger.info(`Activation email resent to ${email}`);
+      return user;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
 
-      this.logger.error(`Resend activation error: ${error instanceof Error ? error.message : String(error)}`);
-      throw new ServerException('Unable to resend activation email');
+      this.logger.error(`Get user by email error: ${error instanceof Error ? error.message : String(error)}`);
+      throw new ServerException('Unable to retrieve user information');
     }
   }
 }

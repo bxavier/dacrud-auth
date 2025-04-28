@@ -62,6 +62,49 @@ class EmailService {
       throw error;
     }
   }
+
+  /**
+   * Send a password reset email to the user
+   * @param email Recipient email
+   * @param name Recipient name
+   * @param resetToken Password reset token
+   * @param expiresIn Token expiration time in minutes
+   */
+  public async sendPasswordResetEmail(email: string, name: string, resetToken: string, expiresIn: number): Promise<void> {
+    try {
+      const appUrl = process.env.APP_URL || 'http://localhost:3000';
+      const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
+
+      const mailOptions = {
+        from: process.env.EMAIL_FROM || 'noreply@example.com',
+        to: email,
+        subject: 'Reset Your Password',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Hello, ${name}</h2>
+            <p>We received a request to reset your password. Click the button below to create a new password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                Reset Password
+              </a>
+            </div>
+            <p>Or copy and paste this reset token:</p>
+            <div style="background-color: #f4f4f4; padding: 10px; border-radius: 4px; text-align: center; margin: 10px 0;">
+              <code>${resetToken}</code>
+            </div>
+            <p><strong>Please note:</strong> This link will expire in ${expiresIn} minutes.</p>
+            <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+          </div>
+        `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.info(`Password reset email sent to ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send password reset email: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }
 }
 
 export default new EmailService();

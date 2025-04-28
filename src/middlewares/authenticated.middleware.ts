@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '@/utils/token';
-import UserModel from '@/resources/user/user.model';
+import UserModel from '@/shared/models/user.model';
 import Token from '@/utils/interfaces/token.interface';
 import { UnauthorizedException } from '@/utils/exceptions';
 import jwt from 'jsonwebtoken';

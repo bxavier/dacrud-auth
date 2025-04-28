@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import Token from './interfaces/token.interface';
 import config from './config';
-import { User } from '@/resources/user/user.interface';
+import { IUser } from '@/shared/interfaces/user.interface';
 import crypto from 'crypto';
 
-export const createToken = async (user: User): Promise<string> => {
+export const createToken = async (user: IUser): Promise<string> => {
   return jwt.sign({ id: user._id }, config.JWT_SECRET as jwt.Secret, { expiresIn: config.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'] });
 };
 

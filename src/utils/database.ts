@@ -8,8 +8,15 @@ const logger = new LoggerService('Database');
  * Initialize database connection
  */
 export const connectDatabase = (): void => {
-  if (!config.MONGO_PATH || !config.MONGO_DATABASE) {
-    logger.error('Missing required database configuration');
+  const missingConfigs = [];
+
+  if (!config.MONGO_PATH) missingConfigs.push('MONGO_PATH');
+  if (!config.MONGO_DATABASE) missingConfigs.push('MONGO_DATABASE');
+  if (!config.MONGO_USER) missingConfigs.push('MONGO_USER');
+  if (!config.MONGO_PASSWORD) missingConfigs.push('MONGO_PASSWORD');
+
+  if (missingConfigs.length > 0) {
+    logger.error(`Missing required database configuration: ${missingConfigs.join(', ')}`);
     process.exit(1);
   }
 
