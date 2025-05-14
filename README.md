@@ -18,7 +18,8 @@ This microservice is part of a larger microservices architecture plan. It curren
 - **Validation**: Zod Request validation
 - **Error Handling**: Enhanced exception hierarchy with consistent responses
 - **Logging**: Winston and Morgan
-- **Security**: Helmet
+- **Security**: Helmet, CORS with whitelist, rate limiting
+- **Multi-Environment Support**: Environment-specific configuration
 - **API Documentation**: Minimal Swagger integration
 - **Health Monitoring**: System health checks
 
@@ -76,8 +77,33 @@ Each resource (like User) follows this pattern, providing clear separation of co
    MONGO_PASSWORD=password
    MONGO_DATABASE=auth_database
    JWT_SECRET=your_jwt_secret
-   JWT_EXPIRES_IN=1d
+   JWT_EXPIRES_IN=1h
+   JWT_REFRESH_EXPIRES_IN=7d
+   APP_URL=http://localhost:3000
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=user
+   SMTP_PASSWORD=password
+   EMAIL_FROM=noreply@example.com
+   RATE_LIMIT_WINDOW=900000
+   RATE_LIMIT_MAX=100
+   AUTH_RATE_LIMIT_WINDOW=3600000
+   AUTH_RATE_LIMIT_MAX=10
+   LOG_LEVEL=info
    ```
+
+### Environment-Specific Configuration
+
+The application supports multiple environment configurations:
+
+- `.env` - Base configuration for all environments
+- `.env.development` - Development-specific overrides
+- `.env.test` - Test-specific overrides
+- `.env.production` - Production-specific overrides
+- `.env.[environment].local` - Local overrides (not committed to repository)
+
+Files are loaded in cascading order, with later files overriding earlier ones.
 
 ### Running the Application
 
@@ -162,6 +188,7 @@ The application uses a comprehensive exception hierarchy for consistent error ha
 ApiException                  // Base class for all API errors
 ├── HttpException             // Base for HTTP errors
     ├── ValidationException   // 400 - Validation errors
+    ├── BadRequestException   // 400 - Invalid request
     ├── UnauthorizedException // 401 - Authentication required
     ├── ForbiddenException    // 403 - Permissions issues
     ├── NotFoundException     // 404 - Resource not found
@@ -179,6 +206,39 @@ All errors return a consistent JSON response:
   "errors": [...] // Optional details
 }
 ```
+
+The error middleware now handles specific MongoDB error types:
+
+- Validation errors (mongoose.Error.ValidationError)
+- Cast errors (mongoose.Error.CastError)
+- Duplicate key errors (code 11000)
+
+In development mode, error responses include the full error message and stack trace for easier debugging.
+
+## Security
+
+### Rate Limiting
+
+The API is protected with rate limiting:
+
+- **Global Rate Limit**: Applies to all API endpoints
+  - Default: 100 requests per 15-minute window
+- **Authentication Rate Limit**: Stricter limits for authentication endpoints
+  - Default: 10 requests per hour
+
+Rate limits are configurable through environment variables.
+
+### CORS Configuration
+
+Cross-Origin Resource Sharing is configured with a whitelist approach:
+
+- Only specified origins are allowed
+- Supports cookies and authentication headers
+- Custom methods and headers can be configured
+
+### Content Security Policy
+
+When running in production, Content Security Policy headers are enabled via Helmet for additional security.
 
 ## License
 

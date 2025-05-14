@@ -7,7 +7,6 @@ import emailService from '@/utils/email';
 
 class AuthService {
   private logger = new LoggerService('AuthService');
-  // Reset token expiration time in minutes
   private readonly RESET_TOKEN_EXPIRES_MINUTES = 30;
 
   /**
@@ -15,10 +14,8 @@ class AuthService {
    */
   public async register(name: string, email: string, password: string, role: string): Promise<void> {
     try {
-      // Generate activation token
       const activationToken = token.generateActivationToken();
 
-      // Create user with activation token
       const user = await UserModel.create({
         name,
         email,
@@ -28,7 +25,6 @@ class AuthService {
         isActive: false,
       });
 
-      // Send activation email
       await emailService.sendActivationEmail(email, name, activationToken);
 
       this.logger.info(`User ${email} registered successfully. Activation email sent.`);
@@ -64,7 +60,6 @@ class AuthService {
         throw new UnauthorizedException('Invalid email or password');
       }
 
-      // Check if user is activated
       if (!user.isActive) {
         this.logger.warn(`Login attempt failed: User ${email} is not activated`);
         throw new UnauthorizedException('Please activate your account first. Check your email for activation instructions.');

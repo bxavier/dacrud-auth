@@ -39,7 +39,7 @@ export class LoggerService {
     winston.addColors(colors);
 
     const format = winston.format.combine(
-      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:SSS' }),
       winston.format.colorize({ all: false }),
       winston.format.printf((info) => {
         const source = info.source ? `[${info.source}]` : '';
