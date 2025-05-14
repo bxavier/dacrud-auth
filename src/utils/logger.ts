@@ -2,9 +2,6 @@ import winston from 'winston';
 
 export type LogLevel = 'error' | 'warn' | 'info' | 'http' | 'debug';
 
-/**
- * Logger service
- */
 export class LoggerService {
   private source: string;
   private logger: winston.Logger;

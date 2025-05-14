@@ -37,7 +37,6 @@ class App {
       return datePart + ':' + ms;
     });
 
-    // Custom morgan format to match winston style with colored http label (magenta)
     const morganFormat = '[:timestamp] [\x1b[35mhttp\x1b[0m] -> :method :url :status - :response-time ms';
 
     this.express.use(morgan(morganFormat));

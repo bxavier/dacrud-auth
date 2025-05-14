@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import config from './config';
 import { LoggerService } from './logger';
 
 class EmailService {
@@ -8,7 +7,6 @@ class EmailService {
 
   constructor() {
     // In production, you would use real SMTP credentials
-    // For development, we can use a test account or ethereal.email
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ethereal.email',
       port: parseInt(process.env.SMTP_PORT || '587', 10),

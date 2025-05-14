@@ -2,9 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
 import { ValidationException } from '@/utils/exceptions';
 
-/**
- * Middleware that validates request data against a Zod schema
- */
 const validationMiddleware =
   (schema: AnyZodObject) =>
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {

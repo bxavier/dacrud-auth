@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Schema for user registration
 export const register = z.object({
   body: z.object({
     name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name cannot exceed 50 characters'),
@@ -10,7 +9,6 @@ export const register = z.object({
   }),
 });
 
-// Schema for user login
 export const login = z.object({
   body: z.object({
     email: z.string().email('Invalid email format'),
@@ -18,28 +16,24 @@ export const login = z.object({
   }),
 });
 
-// Schema for account activation
 export const activate = z.object({
   body: z.object({
     token: z.string(),
   }),
 });
 
-// Schema for resending activation email
 export const resendActivation = z.object({
   body: z.object({
     email: z.string().email('Invalid email format'),
   }),
 });
 
-// Schema for forgot password
 export const forgotPassword = z.object({
   body: z.object({
     email: z.string().email('Invalid email format'),
   }),
 });
 
-// Schema for password reset
 export const resetPassword = z.object({
   body: z
     .object({

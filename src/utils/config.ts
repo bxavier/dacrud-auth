@@ -2,10 +2,6 @@ import { cleanEnv, str, port, bool, num } from 'envalid';
 import path from 'path';
 import fs from 'fs';
 
-/**
- * Configuration service that loads and validates environment variables
- * with support for different environments (development, test, production)
- */
 class Config {
   public NODE_ENV: string;
   public PORT: number;
@@ -30,7 +26,6 @@ class Config {
   public LOG_LEVEL: string;
 
   constructor() {
-    // Load environment-specific .env file if it exists
     this.loadEnvFile();
 
     const env = cleanEnv(process.env, {
@@ -80,10 +75,6 @@ class Config {
     this.LOG_LEVEL = env.LOG_LEVEL;
   }
 
-  /**
-   * Load environment-specific .env file
-   * Allows for different configurations based on NODE_ENV
-   */
   private loadEnvFile(): void {
     const nodeEnv = process.env.NODE_ENV || 'development';
     const envFiles = [
@@ -100,37 +91,22 @@ class Config {
     });
   }
 
-  /**
-   * Get MongoDB connection string
-   */
   public getMongoURI(): string {
     return `mongodb://${this.MONGO_USER}:${this.MONGO_PASSWORD}@${this.MONGO_PATH}/${this.MONGO_DATABASE}`;
   }
 
-  /**
-   * Check if the app is running in production mode
-   */
   public isProduction(): boolean {
     return this.NODE_ENV === 'production';
   }
 
-  /**
-   * Check if the app is running in test mode
-   */
   public isTest(): boolean {
     return this.NODE_ENV === 'test';
   }
 
-  /**
-   * Check if the app is running in development mode
-   */
   public isDevelopment(): boolean {
     return this.NODE_ENV === 'development';
   }
 
-  /**
-   * Get the current environment
-   */
   public getEnvironment(): string {
     return this.NODE_ENV;
   }

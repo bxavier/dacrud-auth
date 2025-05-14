@@ -1,6 +1,3 @@
-/**
- * Base exception class for all API errors
- */
 class ApiException extends Error {
   public status: number;
   public message: string;

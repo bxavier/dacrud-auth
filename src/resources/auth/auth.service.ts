@@ -1,4 +1,4 @@
-import UserModel from './models/user.model';
+import UserModel from '@/shared/models/user.model';
 import { IUser } from '@/shared/interfaces/user.interface';
 import { ConflictException, NotFoundException, ServerException, UnauthorizedException, BadRequestException } from '@/utils/exceptions';
 import token from '@/utils/token';
@@ -9,9 +9,6 @@ class AuthService {
   private logger = new LoggerService('AuthService');
   private readonly RESET_TOKEN_EXPIRES_MINUTES = 30;
 
-  /**
-   * Register a new user
-   */
   public async register(name: string, email: string, password: string, role: string): Promise<void> {
     try {
       const activationToken = token.generateActivationToken();
@@ -37,9 +34,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Login a user
-   */
   public async login(email: string, password: string): Promise<string> {
     try {
       if (!email || !password) {
@@ -78,13 +72,8 @@ class AuthService {
     }
   }
 
-  /**
-   * Activate a user account
-   * @param activationToken The token sent to the user's email
-   */
   public async activate(activationToken: string): Promise<IUser> {
     try {
-      // Find user with the provided activation token
       const user = await UserModel.findOne({ activationToken });
 
       if (!user) {
@@ -92,9 +81,8 @@ class AuthService {
         throw new NotFoundException('Invalid activation token');
       }
 
-      // Activate the user
       user.isActive = true;
-      user.activationToken = null; // Clear the token for security
+      user.activationToken = null;
       await user.save();
 
       this.logger.info(`User ${user.email} activated successfully`);
@@ -109,10 +97,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Resend activation email
-   * @param email The user's email
-   */
   public async resendActivation(email: string): Promise<void> {
     try {
       const user = await UserModel.findOne({ email });
@@ -125,12 +109,10 @@ class AuthService {
         throw new ConflictException('Account is already activated');
       }
 
-      // Generate new activation token
       const activationToken = token.generateActivationToken();
       user.activationToken = activationToken;
       await user.save();
 
-      // Send new activation email
       await emailService.sendActivationEmail(user.email, user.name, activationToken);
 
       this.logger.info(`Activation email resent to ${email}`);
@@ -144,34 +126,24 @@ class AuthService {
     }
   }
 
-  /**
-   * Initiate the forgot password process
-   * @param email User's email address
-   */
   public async forgotPassword(email: string): Promise<void> {
     try {
-      // Find user with the provided email
       const user = await UserModel.findOne({ email });
 
       if (!user) {
-        // We don't want to reveal if an email exists in our database for security
         this.logger.warn(`Forgot password requested for non-existent email: ${email}`);
-        return; // Return silently to prevent user enumeration attacks
+        return;
       }
 
-      // Generate reset token
       const resetToken = token.generateActivationToken();
 
-      // Set token expiration (30 minutes from now)
       const resetTokenExpires = new Date();
       resetTokenExpires.setMinutes(resetTokenExpires.getMinutes() + this.RESET_TOKEN_EXPIRES_MINUTES);
 
-      // Save token and expiration to user
       user.resetPasswordToken = resetToken;
       user.resetPasswordExpires = resetTokenExpires;
       await user.save();
 
-      // Send reset email
       await emailService.sendPasswordResetEmail(user.email, user.name, resetToken, this.RESET_TOKEN_EXPIRES_MINUTES);
 
       this.logger.info(`Password reset email sent to ${email}`);
@@ -181,17 +153,11 @@ class AuthService {
     }
   }
 
-  /**
-   * Reset a user's password with the provided token
-   * @param token Reset password token
-   * @param newPassword New password
-   */
   public async resetPassword(token: string, newPassword: string): Promise<void> {
     try {
-      // Find user with the provided token and check if it's expired
       const user = await UserModel.findOne({
         resetPasswordToken: token,
-        resetPasswordExpires: { $gt: new Date() }, // Only valid if expiration is after current time
+        resetPasswordExpires: { $gt: new Date() },
       });
 
       if (!user) {
@@ -199,7 +165,6 @@ class AuthService {
         throw new BadRequestException('Password reset token is invalid or has expired');
       }
 
-      // Update password and clear reset token fields
       user.password = newPassword;
       user.resetPasswordToken = null;
       user.resetPasswordExpires = null;

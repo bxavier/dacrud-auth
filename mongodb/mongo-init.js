@@ -1,6 +1,5 @@
 db.createCollection('users');
 
-// Insert mock user documents
 db.users.insertMany([
   {
     name: 'Admin User',

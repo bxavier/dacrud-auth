@@ -1,13 +1,11 @@
 import { z } from 'zod';
 
-// Schema for retrieving a user
 export const getUser = z.object({
   params: z.object({
     id: z.string().optional(),
   }),
 });
 
-// Schema for updating user profile
 export const updateUser = z.object({
   body: z
     .object({

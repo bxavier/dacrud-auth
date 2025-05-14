@@ -50,9 +50,6 @@ interface SystemHealth {
 class HealthService {
   private logger = new LoggerService('HealthService');
 
-  /**
-   * Check database connection status
-   */
   private async getDatabaseStatus(): Promise<DatabaseStatus> {
     const dbState = [
       { value: 0, label: 'disconnected' },
@@ -84,9 +81,6 @@ class HealthService {
     return dbInfo;
   }
 
-  /**
-   * Get overall system health
-   */
   public async getHealth(): Promise<SystemHealth> {
     const [dbStatus, cpuLoad, cpuInfo, memInfo, diskInfo] = await Promise.all([
       this.getDatabaseStatus(),

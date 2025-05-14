@@ -1,8 +1,5 @@
 import { Document } from 'mongoose';
 
-/**
- * Interface representing a user in the system
- */
 export interface IUser extends Document {
   name: string;
   email: string;

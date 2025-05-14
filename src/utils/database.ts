@@ -4,9 +4,6 @@ import config from './config';
 
 const logger = new LoggerService('Database');
 
-/**
- * Initialize database connection
- */
 export const connectDatabase = (): void => {
   const missingConfigs = [];
 
