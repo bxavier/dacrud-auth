@@ -2,13 +2,13 @@ import express, { Application } from 'express';
 import compression from 'compression';
 import cors from 'cors';
 import morgan from 'morgan';
-import Controller from '@/utils/interfaces/controller.interface';
+import Controller from '@/shared/interfaces/controller.interface';
 import ErrorMiddleware from '@/middlewares/error.middleware';
 import helmet from 'helmet';
-import connectDatabase from '@/utils/database';
-import { LoggerService } from '@/utils/logger';
-import config from '@/utils/config';
-import { setupSwagger } from '@/utils/swagger';
+import connectDatabase from '@/core/database';
+import { LoggerService } from '@/core/logger';
+import config from '@/core/config';
+import { setupSwagger } from '@/docs/swagger';
 
 class App {
   public express: Application;

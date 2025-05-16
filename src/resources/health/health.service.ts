@@ -1,56 +1,13 @@
 import mongoose from 'mongoose';
 import si from 'systeminformation';
-import config from '@/utils/config';
-import { LoggerService } from '@/utils/logger';
-
-interface DatabaseStatus {
-  name: string;
-  host: string;
-  state: number;
-  status: string;
-  responseTime?: number;
-}
-
-interface SystemHealth {
-  status: string;
-  message: string;
-  timestamp: string;
-  uptime: number;
-  system: {
-    cpu: {
-      usage: number;
-      cores: number;
-    };
-    memory: {
-      total: number;
-      free: number;
-      used: number;
-      usedPercent: number;
-    };
-    disk: {
-      total: number;
-      free: number;
-      used: number;
-      usedPercent: number;
-    };
-  };
-  database: DatabaseStatus;
-  framework: {
-    name: string;
-    version: string;
-    nodeVersion: string;
-  };
-  application: {
-    environment: string;
-    version: string;
-    build: string;
-  };
-}
+import config from '@/core/config';
+import { LoggerService } from '@/core/logger';
+import { IDatabaseStatus, ISystemHealth } from './health.interface';
 
 class HealthService {
   private logger = new LoggerService('HealthService');
 
-  private async getDatabaseStatus(): Promise<DatabaseStatus> {
+  private async getDatabaseStatus(): Promise<IDatabaseStatus> {
     const dbState = [
       { value: 0, label: 'disconnected' },
       { value: 1, label: 'connected' },
@@ -60,7 +17,7 @@ class HealthService {
 
     const currentDbState = dbState.find((state) => state.value === mongoose.connection.readyState) || dbState[0];
 
-    const dbInfo: DatabaseStatus = {
+    const dbInfo: IDatabaseStatus = {
       name: config.MONGO_DATABASE,
       host: config.MONGO_PATH,
       state: currentDbState.value,
@@ -81,7 +38,7 @@ class HealthService {
     return dbInfo;
   }
 
-  public async getHealth(): Promise<SystemHealth> {
+  public async getHealth(): Promise<ISystemHealth> {
     const [dbStatus, cpuLoad, cpuInfo, memInfo, diskInfo] = await Promise.all([
       this.getDatabaseStatus(),
       si.currentLoad(),

@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import IController from '@/utils/interfaces/controller.interface';
+import IController from '@/shared/interfaces/controller.interface';
 import AuthService from './auth.service';
 import validationMiddleware from '@/middlewares/validation.middleware';
 import authValidation from './auth.validation';
-import { LoggerService } from '@/utils/logger';
+import { LoggerService } from '@/core/logger';
 
 /**
  * @openapi

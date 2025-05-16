@@ -1,9 +1,9 @@
 import UserModel from '@/shared/models/user.model';
 import { IUser } from '@/shared/interfaces/user.interface';
-import { ConflictException, NotFoundException, ServerException, UnauthorizedException, BadRequestException } from '@/utils/exceptions';
-import token from '@/utils/token';
-import { LoggerService } from '@/utils/logger';
-import emailService from '@/utils/email';
+import { ConflictException, NotFoundException, ServerException, UnauthorizedException, BadRequestException } from '@/core/exceptions';
+import token from '@/auth/token';
+import { LoggerService } from '@/core/logger';
+import emailService from '@/core/email';
 
 class AuthService {
   private logger = new LoggerService('AuthService');

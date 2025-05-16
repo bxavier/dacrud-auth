@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { ApiException } from '@/utils/exceptions';
-import { LoggerService } from '@/utils/logger';
+import { ApiException } from '@/core/exceptions';
+import { LoggerService } from '@/core/logger';
 import mongoose from 'mongoose';
-import config from '@/utils/config';
+import config from '@/core/config';
 
 const logger = new LoggerService('ErrorMiddleware');
 const errorMiddleware = (error: Error, request: Request, response: Response, next: NextFunction): void => {

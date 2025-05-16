@@ -1,7 +1,7 @@
 import { CallbackError, Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { IUser } from '@/shared/interfaces/user.interface';
-import { LoggerService } from '@/utils/logger';
+import { LoggerService } from '@/core/logger';
 
 const logger = new LoggerService('UserModel');
 

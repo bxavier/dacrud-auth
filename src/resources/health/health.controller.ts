@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import Controller from '@/utils/interfaces/controller.interface';
+import Controller from '@/shared/interfaces/controller.interface';
 import HealthService from './health.service';
 
 /**

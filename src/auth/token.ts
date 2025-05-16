@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import Token from './interfaces/token.interface';
-import config from './config';
+import Token from '@/shared/interfaces/token.interface';
+import config from '@/core/config';
 import { IUser } from '@/shared/interfaces/user.interface';
 import crypto from 'crypto';
 

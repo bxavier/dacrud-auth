@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '@/utils/token';
+import { verifyToken } from '@/auth/token';
 import UserModel from '@/shared/models/user.model';
-import Token from '@/utils/interfaces/token.interface';
-import { UnauthorizedException } from '@/utils/exceptions';
+import Token from '@/shared/interfaces/token.interface';
+import { UnauthorizedException } from '@/core/exceptions';
 import jwt from 'jsonwebtoken';
-import { LoggerService } from '@/utils/logger';
+import { LoggerService } from '@/core/logger';
 
 const logger = new LoggerService('authenticationMiddleware');
 async function authenticationMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {

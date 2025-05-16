@@ -1,7 +1,7 @@
 import UserModel from '@/shared/models/user.model';
 import { IUser } from '@/shared/interfaces/user.interface';
-import { NotFoundException, ServerException, UnauthorizedException } from '@/utils/exceptions';
-import { LoggerService } from '@/utils/logger';
+import { NotFoundException, ServerException, UnauthorizedException } from '@/core/exceptions';
+import { LoggerService } from '@/core/logger';
 
 class UserService {
   logger = new LoggerService('UserService');

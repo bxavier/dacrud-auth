@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
-import { ValidationException } from '@/utils/exceptions';
+import { ValidationException } from '@/core/exceptions';
 
 const validationMiddleware =
   (schema: AnyZodObject) =>
