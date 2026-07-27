@@ -1,7 +1,7 @@
 # Basic configuration
 APP_NAME := dacrud
 MODULE_NAME := mongo-database
-CONTAINER_TOOL := podman
+CONTAINER_TOOL := docker
 MONGO_IMAGE := docker.io/mongo
 MONGO_PORT := 27017
 MONGO_INIT_SCRIPT := ./mongo-init.js

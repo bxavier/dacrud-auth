@@ -1,7 +1,7 @@
 import { Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
-import { LoggerService } from './logger';
+import { LoggerService } from '../core/logger';
 
 const logger = new LoggerService('Swagger');
 
